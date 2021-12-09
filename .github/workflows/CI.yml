@@ -65,10 +65,12 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build
+    # needs: build
     steps:
       - name: clone this ropo to runner
         uses: actions/checkout@v2
+        
+      - name: ls
         run: ls
         
         
