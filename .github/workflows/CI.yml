@@ -76,7 +76,7 @@ jobs:
 
       - name: install doctl (digital-ocean-cli)
         working-directory: scripts
-        run: sudo sh ./scripts/install-doctl.sh
+        run: sudo sh ./install-doctl.sh
 
       - name: authenticate with doctl
         run: /usr/bin/doctl auth init -t ${{ secrets.DIGITAL_OCEAN_TOKEN }}
