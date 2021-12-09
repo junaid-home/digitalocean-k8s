@@ -4,96 +4,90 @@ on:
     branches:
       - main
 jobs:
-  # build: 
-  #   runs-on: ubuntu-latest 
+  build: 
+    runs-on: ubuntu-latest 
 
-  #   steps:
-  #     - name: clone this ropo to runner
-  #       uses: actions/checkout@v2
-
-  #     - name: authenticate with docker-hub
-  #       uses: docker/login-action@v1
-  #       with:
-  #         username: ${{ secrets.DOCKER_HUB_USERNAME }}
-  #         password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-  #     - name: set up docker cross platform builder
-  #       id: buildx
-  #       uses: docker/setup-buildx-action@v1
-      
-  #     - name: cache docker layers
-  #       uses: actions/cache@v2
-  #       with:
-  #         path: /tmp/.buildx-cache
-  #         key: ${{ runner.os }}-buildx-${{ github.sha }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-buildx-
-          
-  #     - name: build and publish client docker-image
-  #       id: client_build
-  #       uses: docker/build-push-action@v2
-  #       with:
-  #         context: ./client
-  #         file: ./client/Dockerfile
-  #         builder: ${{ steps.buildx.outputs.name }}
-  #         push: true
-  #         tags: |
-  #           ${{ secrets.DOCKER_HUB_USERNAME }}/react-client:latest
-  #           ${{ secrets.DOCKER_HUB_USERNAME }}/react-client:${{ github.sha }}
-  #         cache-from: type=local,src=/tmp/.buildx-cache
-  #         cache-to: type=local,dest=/tmp/.buildx-cache
-
-  #     - name: print client docker-image hash
-  #       run: echo ${{ steps.client_build.outputs.digest }}
-
-  #     - name: build and publish server docker-image
-  #       id: server_build
-  #       uses: docker/build-push-action@v2
-  #       with:
-  #         context: ./server
-  #         file: ./server/Dockerfile
-  #         builder: ${{ steps.buildx.outputs.name }}
-  #         push: true
-  #         tags: |
-  #           ${{ secrets.DOCKER_HUB_USERNAME }}/node-server:latest
-  #           ${{ secrets.DOCKER_HUB_USERNAME }}/node-server:${{ github.sha }}
-  #         cache-from: type=local,src=/tmp/.buildx-cache
-  #         cache-to: type=local,dest=/tmp/.buildx-cache
-
-  #     - name: print server docker-image hash
-  #       run: echo ${{ steps.server_build.outputs.digest }}
-
-  deploy:
-    runs-on: ubuntu-latest
-    # needs: build
     steps:
       - name: clone this ropo to runner
         uses: actions/checkout@v2
-        
-      - name: ls
-        run: ls
-        
-        
+
+      - name: authenticate with docker-hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: set up docker cross platform builder
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+      
+      - name: cache docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+          
+      - name: build and publish client docker-image
+        id: client_build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./client
+          file: ./client/Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/react-client:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/react-client:${{ github.sha }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: print client docker-image hash
+        run: echo ${{ steps.client_build.outputs.digest }}
+
+      - name: build and publish server docker-image
+        id: server_build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/node-server:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/node-server:${{ github.sha }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: print server docker-image hash
+        run: echo ${{ steps.server_build.outputs.digest }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: clone this ropo to runner
+        uses: actions/checkout@v2
+
       - name: install kubectl
         working-directory: scripts
-        run: |
-          ls
-          sudo sh ./install-kubectl.sh
+        run: sudo sh ./install-kubectl.sh
 
-      # - name: install doctl (digital-ocean-cli)
-      #   working-directory: scripts
-      #   run: sudo sh ./scripts/install-doctl.sh
+      - name: install doctl (digital-ocean-cli)
+        working-directory: scripts
+        run: sudo sh ./scripts/install-doctl.sh
 
-      # - name: authenticate with doctl
-      #   run: /usr/bin/doctl auth init -t ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+      - name: authenticate with doctl
+        run: /usr/bin/doctl auth init -t ${{ secrets.DIGITAL_OCEAN_TOKEN }}
       
-      # - name: generate kubeconfig
-      #   run: doctl kubernetes cluster kubeconfig save ${{ secrets.CLUSTER_ID }}
+      - name: generate kubeconfig
+        run: doctl kubernetes cluster kubeconfig save ${{ secrets.CLUSTER_ID }}
 
-      # - name: feed k8s config files to cluster
-      #   run: kubectl apply -f k8s
+      - name: feed k8s config files to cluster
+        run: kubectl apply -f k8s
 
-      # - name: set latest k8s deployment images
-      #   run: |
-      #     kubectl set image deployments/node-server node-server=junaidhome/node-server:${{ github.sha }}
-      #     kubectl set image deployments/react-client react-client=junaidhome/react-client:${{ github.sha }}
+      - name: set latest k8s deployment images
+        run: |
+          kubectl set image deployments/node-server node-server=junaidhome/node-server:${{ github.sha }}
+          kubectl set image deployments/react-client react-client=junaidhome/react-client:${{ github.sha }}
