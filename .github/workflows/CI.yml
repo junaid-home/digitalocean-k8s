@@ -79,7 +79,7 @@ jobs:
         run: sudo sh ./install-doctl.sh
 
       - name: authenticate with doctl
-        run: /usr/bin/doctl auth init -t ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+        run: /usr/local/bin/doctl auth init -t ${{ secrets.DIGITAL_OCEAN_TOKEN }}
       
       - name: generate kubeconfig
         run: doctl kubernetes cluster kubeconfig save ${{ secrets.CLUSTER_ID }}
