@@ -7,18 +7,9 @@ jobs:
   build: 
     runs-on: ubuntu-latest 
 
-    strategy:
-      matrix: 
-        node-version: [14.x]
-
     steps:
       - name: clone this ropo to runner
         uses: actions/checkout@v2
-
-      - name: install and setup node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
 
       - name: authenticate with docker-hub
         uses: docker/login-action@v1
@@ -71,3 +62,26 @@ jobs:
 
       - name: print server docker-image hash
         run: echo ${{ steps.server_build.outputs.digest }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install kubectl
+        run: ./.github/scripts/install-kubectl.sh
+
+      - name: install doctl (digital-ocean-cli)
+        run: ./.github/scripts/install-doctl.sh
+
+      - name: authenticate with doctl
+        run: /usr/bin/doctl auth init -t ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+      
+      - name: generate kubeconfig
+        run: doctl kubernetes cluster kubeconfig save ${{ secrets.CLUSTER_ID }}
+
+      - name: feed k8s config files to cluster
+        run: kubectl apply -f k8s
+
+      - name: set latest k8s deployment images
+        run: |
+          kubectl set image deployments/node-server node-server=junaidhome/node-server:${{ github.sha }}
+          kubectl set image deployments/react-client react-client=junaidhome/react-client:${{ github.sha }}
