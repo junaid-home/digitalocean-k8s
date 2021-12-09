@@ -65,7 +65,11 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    needs: build
     steps:
+      - name: clone this ropo to runner
+        uses: actions/checkout@v2
+        
       - name: install kubectl
         run: ./.github/scripts/install-kubectl.sh
 
