@@ -71,10 +71,12 @@ jobs:
         uses: actions/checkout@v2
         
       - name: install kubectl
-        run: sh ./scripts/install-kubectl.sh
+        working-directory: scripts
+        run: sudo sh ./install-kubectl.sh
 
       - name: install doctl (digital-ocean-cli)
-        run: sh ./scripts/install-doctl.sh
+        working-directory: scripts
+        run: sudo sh ./scripts/install-doctl.sh
 
       - name: authenticate with doctl
         run: /usr/bin/doctl auth init -t ${{ secrets.DIGITAL_OCEAN_TOKEN }}
