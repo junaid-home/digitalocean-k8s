@@ -42,7 +42,7 @@ jobs:
         id: client_build
         uses: docker/build-push-action@v2
         with:
-          context: ./
+          context: ./client
           file: ./client/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
@@ -59,7 +59,7 @@ jobs:
         id: server_build
         uses: docker/build-push-action@v2
         with:
-          context: ./
+          context: ./server
           file: ./server/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
