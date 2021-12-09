@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-database-container
+  template:
+    metadata:
+      labels:
+        app: postgres-database-container
+    spec:
+      containers:
+        - name: postgres-database
+          image: postgres:latest
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: my-volume
+              mountPath: /var/lib/postgresql/data
+              subPath: postgres
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-password
+                  key: DATABASE_PASSWD
+            - name: POSTGRES_USER
+              value: postgres
+      volumes:
+        - name: my-volume
+          persistentVolumeClaim:
+            claimName: postgres-persistent-volume-claim
