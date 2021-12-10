@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: myk8s-ml-tls
+spec:
+  secretName: myk8s-ml
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - myk8s.ml
+    - www.myk8s.ml

@@ -71,11 +71,11 @@ jobs:
         uses: actions/checkout@v2
 
       - name: install kubectl
-        working-directory: scripts
+        working-directory: .github/scripts
         run: sudo sh ./install-kubectl.sh
 
       - name: install doctl (digital-ocean-cli)
-        working-directory: scripts
+        working-directory: .github/scripts
         run: sudo sh ./install-doctl.sh
 
       - name: authenticate with doctl
